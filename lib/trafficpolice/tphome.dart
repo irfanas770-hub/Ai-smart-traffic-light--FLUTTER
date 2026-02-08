@@ -1,42 +1,42 @@
 import 'dart:convert';
 import 'package:aismarttrafficlight/login.dart';
+import 'package:aismarttrafficlight/trafficpolice/add_trafficblock.dart';
+import 'package:aismarttrafficlight/trafficpolice/addnotification.dart';
+import 'package:aismarttrafficlight/trafficpolice/tpchangepassword.dart';
+import 'package:aismarttrafficlight/trafficpolice/view_trafficblock.dart';
+import 'package:aismarttrafficlight/trafficpolice/viewallocation.dart';
 import 'package:aismarttrafficlight/trafficpolice/viewfine.dart';
+import 'package:aismarttrafficlight/trafficpolice/viewnotification.dart';
 import 'package:aismarttrafficlight/trafficpolice/viewprofile.dart';
 import 'package:aismarttrafficlight/trafficpolice/viewvehicle.dart';
-import 'package:aismarttrafficlight/user/view_evtrip.dart';
-import 'package:http/http.dart' as http;
-import 'package:aismarttrafficlight/user/addownvehicle.dart';
-import 'package:aismarttrafficlight/user/viewevalert.dart';
-import 'package:aismarttrafficlight/user/viewfineentryandpay.dart';
-import 'package:aismarttrafficlight/user/viewnearbynotification.dart';
-import 'package:aismarttrafficlight/user/viewnearbytsalert.dart';
-import 'package:aismarttrafficlight/user/viewownvehicle.dart';
-import 'package:aismarttrafficlight/user/viewpaidlogs.dart';
-import 'package:aismarttrafficlight/user/viewprofile.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
+import 'package:http/http.dart' as http;
 import 'addfine.dart';
-// import 'package:smart_billing/view_user.dart';
-//
-// import 'add_user.dart';
+
 void main() {
   runApp(const MyApp());
 }
+
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'tphome Page Demo',
+      debugShowCheckedModeBanner: false,
+      title: 'Traffic Police',
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
-        useMaterial3: true,
+        fontFamily: 'Segoe UI',
+        scaffoldBackgroundColor: const Color(0xFFF5F7FA),
+        appBarTheme: const AppBarTheme(
+          backgroundColor: Color(0xFF0A3D62),
+          foregroundColor: Colors.white,
+          elevation: 0,
+        ),
       ),
       home: const tphome(),
-      debugShowCheckedModeBanner: false,
     );
   }
 }
@@ -49,196 +49,161 @@ class tphome extends StatefulWidget {
 }
 
 class _tphomeState extends State<tphome> {
-  _tphomeState(){
-    _send_data();
+  String photo_ = "";
+  String station_ = "Traffic Officer";
+
+  @override
+  void initState() {
+    super.initState();
+    _loadProfile();
   }
+
+  Future<void> _loadProfile() async {
+    final sh = await SharedPreferences.getInstance();
+    final url = sh.getString('url');
+    final lid = sh.getString('lid');
+    final img = sh.getString('img_url');
+
+    if (url == null || lid == null || img == null) return;
+
+    try {
+      final response = await http.post(
+        Uri.parse('$url/tp_viewprofile_post/'),
+        body: {'lid': lid},
+      );
+      if (response.statusCode == 200) {
+        final json = jsonDecode(response.body);
+        if (json['status'] == 'ok') {
+          setState(() {
+            station_ = json['station'] ?? 'Traffic Police Station';
+            photo_ = img + (json['photo'] ?? '');
+          });
+        }
+      }
+    } catch (e) {
+      //
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Welcome tphome'),
+        title: const Text("TRAFFIC POLICE"),
         centerTitle: true,
-        backgroundColor: Theme.of(context).colorScheme.primary,
-        foregroundColor: Colors.white,
-        elevation: 4,
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(20.0),
-        child: ListView(
-          // crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const SizedBox(height: 20),
-            Center(
-              child: CircleAvatar(
-                radius: 50,
-                backgroundImage: NetworkImage(
-                  photo_,
-                ),
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            children: [
+              const SizedBox(height: 20),
+
+              // Profile Section
+              CircleAvatar(
+                radius: 60,
+                backgroundColor: Colors.grey[300],
+                backgroundImage: photo_.isNotEmpty ? NetworkImage(photo_) : null,
+                child: photo_.isEmpty
+                    ? const Icon(Icons.security, size: 70, color: Color(0xFF0A3D62))
+                    : null,
               ),
-            ),
-            const SizedBox(height: 30),
-             Center(
-              child: Text(
-                'Hello, ${station_}!',
-                style: TextStyle(
-                  fontSize: 24,
+              const SizedBox(height: 20),
+              Text(
+                "Welcome back,",
+                style: TextStyle(fontSize: 18, color: Colors.grey[700]),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                station_,
+                style: const TextStyle(
+                  fontSize: 28,
                   fontWeight: FontWeight.bold,
+                  color: Color(0xFF0A3D62),
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 40),
+
+              // Action Grid - Eye-Friendly Cards
+              Wrap(
+                spacing: 16,
+                runSpacing: 16,
+                alignment: WrapAlignment.center,
+                children: [
+                  _menuCard("View vehicle", Icons.receipt_long, () => Navigator.push(context, MaterialPageRoute(builder: (_) => viewvehicle(title: '')))),
+                  _menuCard("Add Notification", Icons.notification_add, () => Navigator.push(context, MaterialPageRoute(builder: (_) => addnotificaion(title: '')))),
+                  _menuCard("View Fines", Icons.format_list_bulleted, () => Navigator.push(context, MaterialPageRoute(builder: (_) => viewfine(title: '')))),
+                  _menuCard("View Notifications", Icons.campaign, () => Navigator.push(context, MaterialPageRoute(builder: (_) => tp_viewnotification(title: '')))),
+                  _menuCard("Add Block", Icons.block, () => Navigator.push(context, MaterialPageRoute(builder: (_) => add_trafficblock(title: '')))),
+                  _menuCard("View Blocks", Icons.traffic, () => Navigator.push(context, MaterialPageRoute(builder: (_) => view_trafficblock(title: '')))),
+                  _menuCard("Allocations", Icons.how_to_reg, () => Navigator.push(context, MaterialPageRoute(builder: (_) => viewallocation(title: '')))),
+                  _menuCard("My Profile", Icons.person_outline, () => Navigator.push(context, MaterialPageRoute(builder: (_) => tpviewprofile(title: '')))),
+                  _menuCard("Change Password", Icons.lock_outline, () => Navigator.push(context, MaterialPageRoute(builder: (_) => tpchangepassword(title: '')))),
+                ],
+              ),
+
+              const SizedBox(height: 50),
+
+              // Logout Button
+              SizedBox(
+                width: double.infinity,
+                child: OutlinedButton.icon(
+                  onPressed: () {
+                    Navigator.pushAndRemoveUntil(
+                      context,
+                      MaterialPageRoute(builder: (_) => MyLoginPage(title: '')),
+                          (route) => false,
+                    );
+                  },
+                  icon: const Icon(Icons.logout, color: Colors.redAccent),
+                  label: const Text(
+                    "LOGOUT",
+                    style: TextStyle(color: Colors.redAccent, fontWeight: FontWeight.bold),
+                  ),
+                  style: OutlinedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    side: const BorderSide(color: Colors.redAccent),
+                  ),
                 ),
               ),
-            ),
-            const SizedBox(height: 10),
-            const Center(
-              child: Text(
-                'Glad to see you back.',
-                style: TextStyle(
-                  fontSize: 16,
-                  color: Colors.grey,
-                ),
-              ),
-            ),
-            const SizedBox(height: 40),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => viewvehicle(title: '')),
-                );
-              },
-              child: const Text('Add Fine'),
-              style: ElevatedButton.styleFrom(
-                minimumSize: const Size.fromHeight(50),
-              ),
-            ),
-            const SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => viewevalert(title: '')),
-                );
-              },
-              child: const Text('Add Notification'),
-              style: ElevatedButton.styleFrom(
-                minimumSize: const Size.fromHeight(50),
-              ),
-            ), const SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => viewfine(title: '')),
-                );
-              },
-              child: const Text('View Fine'),
-              style: ElevatedButton.styleFrom(
-                minimumSize: const Size.fromHeight(50),
-              ),
-            ),
-            const SizedBox(height: 20),
-
-
-
-            ElevatedButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => viewnearbynotification(title: '')),
-                );
-              },
-              child: const Text('View Notification'),
-              style: ElevatedButton.styleFrom(
-                minimumSize: const Size.fromHeight(50),
-              ),
-            ),
-            const SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => tpviewprofile(title: '')),
-                );
-              },
-              child: const Text('View Profile'),
-              style: ElevatedButton.styleFrom(
-                minimumSize: const Size.fromHeight(50),
-              ),
-            ),
-
-            const Spacer(),
-            Center(
-              child: TextButton(
-                onPressed: () {
-                 Navigator.push(
-                     context,
-                     MaterialPageRoute(builder: (context) =>MyLoginPage(title: '',),));
-                },
-                child: const Text(
-                  'Log Out',
-                  style: TextStyle(color: Colors.red),
-                ),
-              ),
-            ),
-          ],
+              const SizedBox(height: 20),
+            ],
+          ),
         ),
       ),
     );
   }
-  String photo_="";
-  String number_="";
-  String email_="";
-  String station_="";
-  String proof_="";
 
-  void _send_data() async{
-
-
-
-    SharedPreferences sh = await SharedPreferences.getInstance();
-    String url = sh.getString('url').toString();
-    String lid = sh.getString('lid').toString();
-    String img = sh.getString('img_url').toString();
-
-    final urls = Uri.parse('$url/tp_viewprofile_post/');
-    try {
-      final response = await http.post(urls, body: {
-        'lid':lid
-
-
-
-      });
-      if (response.statusCode == 200) {
-        String status = jsonDecode(response.body)['status'];
-        if (status=='ok') {
-          String number=jsonDecode(response.body)['number'];
-          String email=jsonDecode(response.body)['email'];
-          String station=jsonDecode(response.body)['station'];
-          String proof=img+jsonDecode(response.body)['proof'];
-          String photo=img+jsonDecode(response.body)['photo'];
-
-          setState(() {
-
-            number_= number;
-            email_= email;
-            station_= station;
-            proof_= proof;
-            photo_= photo;
-          });
-
-
-
-
-
-        }else {
-          Fluttertoast.showToast(msg: 'Not Found');
-        }
-      }
-      else {
-        Fluttertoast.showToast(msg: 'Network Error');
-      }
-    }
-    catch (e){
-      Fluttertoast.showToast(msg: e.toString());
-    }
+  Widget _menuCard(String title, IconData icon, VoidCallback onTap) {
+    return SizedBox(
+      width: MediaQuery.of(context).size.width * 0.42,
+      child: Card(
+        elevation: 6,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(16),
+          onTap: onTap,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 24),
+            child: Column(
+              children: [
+                Icon(icon, size: 50, color: const Color(0xFF0A3D62)),
+                const SizedBox(height: 12),
+                Text(
+                  title,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w600,
+                    color: Color(0xFF2D3436),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
   }
 }
-

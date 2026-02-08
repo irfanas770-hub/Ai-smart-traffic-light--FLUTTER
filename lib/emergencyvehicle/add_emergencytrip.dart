@@ -1,173 +1,4 @@
-// import 'dart:convert';
-// import 'dart:io';
-// import 'package:flutter/material.dart';
-// import 'package:fluttertoast/fluttertoast.dart';
-// import 'package:shared_preferences/shared_preferences.dart';
-// import 'package:http/http.dart' as http;
-// import 'package:image_picker/image_picker.dart';
-// // import 'home.dart';
-// // import 'newhome.dart';
-//
-//
-// void main() {
-//   runApp( add_emergencytrip(title: '',));
-// }
-//
-// class add_emergencytrip extends StatefulWidget {
-//   const add_emergencytrip({super.key, required this.title});
-//
-//   final String title;
-//   @override
-//   State<add_emergencytrip> createState() => _add_emergencytripState();
-//
-// }
-// class _add_emergencytripState extends State<add_emergencytrip> {
-//
-//   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-//   final TextEditingController _datetextController = TextEditingController();
-//   final TextEditingController _timetextController = TextEditingController();
-//   final TextEditingController _destinationtextController = TextEditingController();
-//
-//   Future<void> _sendData() async {
-//     String evdate = _datetextController.text;
-//     String evtime = _timetextController.text;
-//     String evdestination = _destinationtextController.text;
-//
-//     SharedPreferences sh = await SharedPreferences.getInstance();
-//     String? url = sh.getString('url');
-//     String lid = sh.getString('lid').toString();
-//
-//     if (url == null) {
-//       Fluttertoast.showToast(msg: "Server URL not found.");
-//       return;
-//     }
-//
-//     final uri = Uri.parse('$url/ev_add_emergency_trip_post/');
-//     var request = http.MultipartRequest('POST', uri);
-//     request.fields['date'] = evdate;
-//     request.fields['time'] = evtime;
-//     request.fields['destination'] = evdestination;
-//     request.fields['lid'] = lid;
-//
-//     // if (_selectedImage != null) {
-//     //   request.files.add(await http.MultipartFile.fromPath('photo', _selectedImage!.path));
-//     // }
-//
-//     try {
-//       var response = await request.send();
-//       var respStr = await response.stream.bytesToString();
-//       var data = jsonDecode(respStr);
-//
-//       if (response.statusCode == 200 && data['status'] == 'ok') {
-//         Fluttertoast.showToast(msg: "Submitted successfully.");
-//       } else {
-//         Fluttertoast.showToast(msg: "Submission failed.");
-//       }
-//     } catch (e) {
-//       Fluttertoast.showToast(msg: "Error: $e");
-//     }
-//   }
-//
-//   @override
-//   Widget build(BuildContext context) {
-//     return WillPopScope(
-//       onWillPop: () async {
-//         // Navigator.pushReplacement(
-//         //   context,
-//         //   MaterialPageRoute(builder: (context) => const BankingDashboard()),
-//         // );
-//         return false;
-//       },
-//       child: Scaffold(
-//         appBar: AppBar(
-//           title: Text(widget.title),
-//           centerTitle: true,
-//           backgroundColor: Theme.of(context).colorScheme.primary,
-//           foregroundColor: Colors.white,
-//         ),
-//         body: SingleChildScrollView(
-//           padding: const EdgeInsets.all(16),
-//           child: Form(
-//             key: _formKey,
-//             child: Column(
-//               children: [
-//
-//                 const SizedBox(height: 20),
-//                 TextFormField(
-//                   controller: _datetextController,
-//                   decoration: const InputDecoration(
-//                     labelText: 'Enter Date',
-//                     border: OutlineInputBorder(),
-//                   ),
-//                   validator: (value) {
-//                     if (value == null || value.trim().isEmpty) {
-//                       return 'Date is required';
-//                     }
-//                     return null;
-//                   },
-//                 ),
-//                 const SizedBox(height: 10),
-//                 TextFormField(
-//                   controller: _timetextController,
-//                   decoration: const InputDecoration(
-//                     labelText: 'Enter Time',
-//                     border: OutlineInputBorder(),
-//                   ),
-//                   keyboardType: TextInputType.emailAddress,
-//                   validator: (value) {
-//                     if (value == null || value.trim().isEmpty) {
-//                       return 'Time is required';
-//                     }
-//                     // if (!RegExp(r'\S+@\S+\.\S+').hasMatch(value)) {
-//                     //   return 'Enter a valid email ';
-//                     // }
-//                     return null;
-//                   },
-//                 ),
-//                 const SizedBox(height: 10),
-//                 TextFormField(
-//                   controller: _destinationtextController,
-//                   decoration: const InputDecoration(
-//                     labelText: 'Enter Your Destination',
-//                     border: OutlineInputBorder(),
-//                   ),
-//                   // keyboardType: TextInputType.String,
-//                   validator: (value) {
-//                     if (value == null || value.trim().isEmpty) {
-//                       return 'Destination is required';
-//                     }
-//                     // if (!RegExp(r'^[0-9]{10}$').hasMatch(value)) {
-//                     //   return 'Enter a valid 10-digit phone number';
-//                     // }
-//                     return null;
-//                   },
-//                 ),
-//                 const SizedBox(height: 20),
-//                 ElevatedButton(
-//                   onPressed: () {
-//                     if (_formKey.currentState!.validate()) {
-//                       _sendData();
-//                     } else {
-//                       Fluttertoast.showToast(msg: "Please fix errors in the form");
-//                     }
-//                   },
-//                   child: const Text("Submit"),
-//                   style: ElevatedButton.styleFrom(
-//                     minimumSize: const Size.fromHeight(50),
-//                   ),
-//                 ),
-//               ],
-//             ),
-//           ),
-//         ),
-//       ),
-//     );
-//   }
-// }
-
-
 import 'dart:convert';
-import 'dart:io';
 import 'package:aismarttrafficlight/emergencyvehicle/view_emergency_trip.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -175,7 +6,10 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 
 void main() {
-  runApp(const MaterialApp(home: add_emergencytrip(title: 'Add Emergency Trip')));
+  runApp(const MaterialApp(
+    debugShowCheckedModeBanner: false,
+    home: add_emergencytrip(title: 'Add Emergency Trip'),
+  ));
 }
 
 class add_emergencytrip extends StatefulWidget {
@@ -186,32 +20,60 @@ class add_emergencytrip extends StatefulWidget {
   State<add_emergencytrip> createState() => _add_emergencytripState();
 }
 
-class _add_emergencytripState extends State<add_emergencytrip> {
+class _add_emergencytripState extends State<add_emergencytrip>
+    with TickerProviderStateMixin {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final TextEditingController _datetextController = TextEditingController();
   final TextEditingController _timetextController = TextEditingController();
   final TextEditingController _destinationtextController = TextEditingController();
 
+  late AnimationController _glowController;
+
+  // Unified Eye-Friendly Palette (same as all other screens)
+  static const Color bgStart = Color(0xFF0D1B2A);
+  static const Color bgEnd = Color(0xFF1B263B);
+  static const Color accent = Color(0xFF4ECDC4);        // Soft calming teal
+  static const Color accentDark = Color(0xFF3AB8B1);
+  static const Color textMain = Color(0xFFE0E1DD);
+  static const Color textMuted = Color(0xFF95A3B3);
+  static const Color success = Color(0xFF95E1B0);
+
+  @override
+  void initState() {
+    super.initState();
+    _glowController = AnimationController(vsync: this, duration: const Duration(seconds: 2))
+      ..repeat(reverse: true);
+  }
+
+  @override
+  void dispose() {
+    _glowController.dispose();
+    super.dispose();
+  }
+
   Future<void> _sendData() async {
-    String evdate = _datetextController.text;
-    String evtime = _timetextController.text;
-    String evdestination = _destinationtextController.text;
+    if (!_formKey.currentState!.validate()) {
+      Fluttertoast.showToast(msg: "Please fill all fields", backgroundColor: Colors.redAccent);
+      return;
+    }
 
     SharedPreferences sh = await SharedPreferences.getInstance();
     String? url = sh.getString('url');
-    String lid = sh.getString('lid').toString();
+    String? lid = sh.getString('lid');
 
-    if (url == null) {
-      Fluttertoast.showToast(msg: "Server URL not found.");
+    if (url == null || lid == null) {
+      Fluttertoast.showToast(msg: "Session expired", backgroundColor: Colors.redAccent);
       return;
     }
 
     final uri = Uri.parse('$url/ev_add_emergency_trip_post/');
     var request = http.MultipartRequest('POST', uri);
-    request.fields['date'] = evdate;
-    request.fields['time'] = evtime;
-    request.fields['destination'] = evdestination;
-    request.fields['lid'] = lid;
+    request.fields.addAll({
+      'date': _datetextController.text,
+      'time': _timetextController.text,
+      'destination': _destinationtextController.text,
+      'lid': lid,
+    });
 
     try {
       var response = await request.send();
@@ -219,37 +81,66 @@ class _add_emergencytripState extends State<add_emergencytrip> {
       var data = jsonDecode(respStr);
 
       if (response.statusCode == 200 && data['status'] == 'ok') {
-        Fluttertoast.showToast(msg: "Submitted successfully.");
-        Navigator.push(context, MaterialPageRoute(builder: (context)=>view_emergency_trip(title: '',)));
-
+        Fluttertoast.showToast(
+          msg: "Emergency Trip Added!",
+          backgroundColor: success,
+          textColor: Colors.white,
+        );
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (_) => view_emergency_trip(title: '')),
+        );
       } else {
-        Fluttertoast.showToast(msg: "Submission failed.");
+        Fluttertoast.showToast(msg: data['msg'] ?? "Failed to add trip", backgroundColor: Colors.redAccent);
       }
     } catch (e) {
-      Fluttertoast.showToast(msg: "Error: $e");
+      Fluttertoast.showToast(msg: "Network error", backgroundColor: Colors.redAccent);
     }
   }
 
-  /// 📅 Show Date Picker
   Future<void> _selectDate(BuildContext context) async {
     DateTime? picked = await showDatePicker(
       context: context,
       initialDate: DateTime.now(),
-      firstDate: DateTime(2024),
-      lastDate: DateTime(2100),
+      firstDate: DateTime.now(),
+      lastDate: DateTime(2030),
+      builder: (context, child) {
+        return Theme(
+          data: ThemeData.dark().copyWith(
+            colorScheme: ColorScheme.dark(
+              primary: accent,
+              onPrimary: Colors.black,
+              surface: bgEnd,
+            ),
+            dialogBackgroundColor: bgEnd,
+          ),
+          child: child!,
+        );
+      },
     );
     if (picked != null) {
       setState(() {
-        _datetextController.text = "${picked.year}-${picked.month}-${picked.day}";
+        _datetextController.text =
+        "${picked.year}-${picked.month.toString().padLeft(2, '0')}-${picked.day.toString().padLeft(2, '0')}";
       });
     }
   }
 
-  /// ⏰ Show Time Picker
   Future<void> _selectTime(BuildContext context) async {
     TimeOfDay? picked = await showTimePicker(
       context: context,
       initialTime: TimeOfDay.now(),
+      builder: (context, child) {
+        return Theme(
+          data: ThemeData.dark().copyWith(
+            colorScheme: ColorScheme.dark(
+              primary: accent,
+              onPrimary: Colors.black,
+            ),
+          ),
+          child: child!,
+        );
+      },
     );
     if (picked != null) {
       setState(() {
@@ -261,94 +152,179 @@ class _add_emergencytripState extends State<add_emergencytrip> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      extendBodyBehindAppBar: true,
       appBar: AppBar(
-        title: Text(widget.title),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        title: const Text(
+          "ADD EMERGENCY TRIP",
+          style: TextStyle(fontWeight: FontWeight.w900, letterSpacing: 3, fontSize: 18),
+        ),
         centerTitle: true,
-        backgroundColor: Theme.of(context).colorScheme.primary,
         foregroundColor: Colors.white,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
+          onPressed: () => Navigator.pop(context),
+        ),
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            children: [
-              const SizedBox(height: 20),
+      body: Container(
+        width: double.infinity,
+        height: double.infinity,
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [bgStart, bgEnd],
+          ),
+        ),
+        child: SafeArea(
+          child: AnimatedBuilder(
+            animation: _glowController,
+            builder: (_, __) {
+              return SingleChildScrollView(
+                padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 30),
+                child: Form(
+                  key: _formKey,
+                  child: Column(
+                    children: [
+                      const SizedBox(height: 30),
 
-              // 📅 Date Picker Field
-              TextFormField(
-                controller: _datetextController,
-                decoration: const InputDecoration(
-                  labelText: 'Select Date',
-                  border: OutlineInputBorder(),
-                  suffixIcon: Icon(Icons.calendar_today),
+                      // Header Icon with Gentle Glow
+                      Container(
+                        padding: const EdgeInsets.all(20),
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: accent.withOpacity(0.15),
+                          boxShadow: [
+                            BoxShadow(
+                              color: accent.withOpacity(0.4 + 0.25 * _glowController.value),
+                              blurRadius: 50,
+                              spreadRadius: 20,
+                            ),
+                          ],
+                        ),
+                        child: Icon(Icons.emergency, size: 80, color: accent),
+                      ),
+
+                      const SizedBox(height: 24),
+                      const Text(
+                        "INITIATE MISSION",
+                        style: TextStyle(color: textMuted, fontSize: 16, letterSpacing: 6, fontWeight: FontWeight.w300),
+                      ),
+                      const SizedBox(height: 8),
+                      const Text(
+                        "Emergency Dispatch",
+                        style: TextStyle(color: textMain, fontSize: 34, fontWeight: FontWeight.w900),
+                        textAlign: TextAlign.center,
+                      ),
+
+                      const SizedBox(height: 70),
+
+                      // Glassmorphic Input Fields
+                      _glassField(
+                        controller: _datetextController,
+                        label: "Mission Date",
+                        icon: Icons.calendar_today_rounded,
+                        onTap: () => _selectDate(context),
+                      ),
+                      const SizedBox(height: 26),
+
+                      _glassField(
+                        controller: _timetextController,
+                        label: "Departure Time",
+                        icon: Icons.access_time_filled_rounded,
+                        onTap: () => _selectTime(context),
+                      ),
+                      const SizedBox(height: 26),
+
+                      _glassField(
+                        controller: _destinationtextController,
+                        label: "Destination / Incident Location",
+                        icon: Icons.location_on_rounded,
+                        keyboardType: TextInputType.streetAddress,
+                      ),
+
+                      const SizedBox(height: 90),
+
+                      // Glowing Dispatch Button
+                      GestureDetector(
+                        onTap: _sendData,
+                        child: Container(
+                          width: double.infinity,
+                          padding: const EdgeInsets.symmetric(vertical: 26),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(28),
+                            gradient: LinearGradient(colors: [accent, accentDark]),
+                            boxShadow: [
+                              BoxShadow(
+                                color: accent.withOpacity(0.6 + 0.3 * _glowController.value),
+                                blurRadius: 60,
+                                spreadRadius: 22,
+                              ),
+                            ],
+                          ),
+                          child: const Center(
+                            child: Text(
+                              "DISPATCH NOW",
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 23,
+                                fontWeight: FontWeight.bold,
+                                letterSpacing: 3.5,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+
+                      const SizedBox(height: 50),
+                    ],
+                  ),
                 ),
-                readOnly: true,
-                onTap: () => _selectDate(context),
-                validator: (value) {
-                  if (value == null || value.trim().isEmpty) {
-                    return 'Date is required';
-                  }
-                  return null;
-                },
-              ),
-
-              const SizedBox(height: 10),
-
-              // ⏰ Time Picker Field
-              TextFormField(
-                controller: _timetextController,
-                decoration: const InputDecoration(
-                  labelText: 'Select Time',
-                  border: OutlineInputBorder(),
-                  suffixIcon: Icon(Icons.access_time),
-                ),
-                readOnly: true,
-                onTap: () => _selectTime(context),
-                validator: (value) {
-                  if (value == null || value.trim().isEmpty) {
-                    return 'Time is required';
-                  }
-                  return null;
-                },
-              ),
-
-              const SizedBox(height: 10),
-
-              // 🗺 Destination Field
-              TextFormField(
-                controller: _destinationtextController,
-                decoration: const InputDecoration(
-                  labelText: 'Enter Destination',
-                  border: OutlineInputBorder(),
-                ),
-                validator: (value) {
-                  if (value == null || value.trim().isEmpty) {
-                    return 'Destination is required';
-                  }
-                  return null;
-                },
-              ),
-
-              const SizedBox(height: 20),
-
-              ElevatedButton(
-                onPressed: () {
-                  if (_formKey.currentState!.validate()) {
-                    _sendData();
-                  } else {
-                    Fluttertoast.showToast(msg: "Please fix errors in the form");
-                  }
-                },
-                style: ElevatedButton.styleFrom(
-                  minimumSize: const Size.fromHeight(50),
-                ),
-                child: const Text("Submit"),
-              ),
-            ],
+              );
+            },
           ),
         ),
       ),
+    );
+  }
+
+  Widget _glassField({
+    required TextEditingController controller,
+    required String label,
+    required IconData icon,
+    VoidCallback? onTap,
+    TextInputType? keyboardType,
+  }) {
+    return TextFormField(
+      controller: controller,
+      readOnly: onTap != null,
+      onTap: onTap,
+      keyboardType: keyboardType,
+      style: const TextStyle(color: textMain, fontSize: 17),
+      decoration: InputDecoration(
+        labelText: label,
+        labelStyle: TextStyle(color: textMuted, fontSize: 16),
+        prefixIcon: Icon(icon, color: accent, size: 26),
+        filled: true,
+        fillColor: Colors.white.withOpacity(0.07),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(28),
+          borderSide: BorderSide(color: accent.withOpacity(0.4), width: 2),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(28),
+          borderSide: BorderSide(color: accent.withOpacity(0.3), width: 1.5),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(28),
+          borderSide: BorderSide(color: accent, width: 3),
+        ),
+        suffixIcon: onTap != null
+            ? Icon(Icons.arrow_drop_down_rounded, color: accent.withOpacity(0.8))
+            : null,
+      ),
+      validator: (value) => value!.trim().isEmpty ? "$label is required" : null,
     );
   }
 }

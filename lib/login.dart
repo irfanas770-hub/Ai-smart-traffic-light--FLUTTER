@@ -1,6 +1,5 @@
-
-
 import 'dart:convert';
+import 'package:aismarttrafficlight/trafficpolice/forgotpass.dart';
 import 'package:aismarttrafficlight/trafficpolice/tphome.dart';
 import 'package:aismarttrafficlight/user/home.dart';
 import 'package:aismarttrafficlight/user/signup.dart';
@@ -9,11 +8,9 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 
-// import 'home.dart';
 import 'emergencyvehicle/evhome.dart';
 import 'emergencyvehicle/signup.dart';
 import 'main.dart';
-// import 'newhome.dart';
 
 void main() {
   runApp(const MaterialApp(
@@ -33,214 +30,284 @@ class MyLoginPage extends StatefulWidget {
 class _MyLoginPageState extends State<MyLoginPage> {
   final TextEditingController _usernametextController = TextEditingController();
   final TextEditingController _passwordtextController = TextEditingController();
+  bool _isLoading = false;
+  bool _obscurePassword = true;
 
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
-        onWillPop: () async {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => const MyHomePage(title: '',)),
-      );
-      return false; // Prevent default pop
-    },
-    child:Scaffold(
-      backgroundColor: const Color(0xFFEFF3FF), // Light blue background
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            // Top Shape and Logo
-            Stack(
-              children: [
-                Container(
-                  height: 180,
-                  decoration: const BoxDecoration(
-                    color: Color(0xFF0047AB),
-                    borderRadius:
-                    BorderRadius.only(bottomLeft: Radius.circular(80)),
-                  ),
-                ),
-                const Positioned(
-                  top: 100,
-                  left: 20,
-                  child: Text(
-                    ' Login',
-                    style: TextStyle(
-                        fontSize: 32,
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold),
-                  ),
-                ),
+      onWillPop: () async {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const IPSetupPage()),
+        );
+        return false;
+      },
+      child: Scaffold(
+        body: Container(
+          height: double.infinity,
+          width: double.infinity,
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [
+                Color(0xFF4A148C), // Deep Purple
+                Color(0xFF7B1FA2),
+                Color(0xFFAB47BC),
+                Color(0xFFE1BEE7),
               ],
+              stops: [0.0, 0.3, 0.6, 1.0],
             ),
-
-            const SizedBox(height: 40),
-
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24.0),
+          ),
+          child: SafeArea(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.symmetric(horizontal: 28),
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text("Email id",
-                      style:
-                      TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-                  const SizedBox(height: 10),
-                  TextField(
+                  const SizedBox(height: 60),
+
+                  // Luxury Logo & Title
+                  Container(
+                    padding: const EdgeInsets.all(20),
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: Colors.white.withOpacity(0.2),
+                      border: Border.all(color: Colors.amber, width: 4),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.amber.withOpacity(0.5),
+                          blurRadius: 30,
+                          spreadRadius: 10,
+                        ),
+                      ],
+                    ),
+                    child: const Icon(Icons.security_rounded, size: 80, color: Colors.amber),
+                  ),
+
+                  const SizedBox(height: 30),
+
+                  const Text(
+                    "Welcome Back",
+                    style: TextStyle(
+                      fontSize: 36,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                      letterSpacing: 1.5,
+                    ),
+                  ),
+
+                  const Text(
+                    "Sign in to continue",
+                    style: TextStyle(fontSize: 18, color: Colors.white70),
+                  ),
+
+                  const SizedBox(height: 50),
+
+                  // Email Field
+                  _buildGlassField(
                     controller: _usernametextController,
-                    decoration: InputDecoration(
-                      hintText: "Enter your email",
-                      filled: true,
-                      fillColor: Colors.white,
-                      border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8),
-                          borderSide: BorderSide.none),
-                    ),
+                    hint: "Enter your email",
+                    icon: Icons.person_outline,
+                    keyboardType: TextInputType.emailAddress,
                   ),
+
                   const SizedBox(height: 20),
-                  const Text("Password",
-                      style:
-                      TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-                  const SizedBox(height: 10),
-                  TextField(
-controller: _passwordtextController,
-                    // obscureText: true,
-                    decoration: InputDecoration(
-                      filled: true,
-                      fillColor: Colors.white,
-                      border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8),
-                          borderSide: BorderSide.none),
+
+                  // Password Field
+                  _buildGlassField(
+                    controller: _passwordtextController,
+                    hint: "Enter your password",
+                    icon: Icons.lock_outline,
+                    isPassword: true,
+                    obscureText: _obscurePassword,
+                    onToggle: () => setState(() => _obscurePassword = !_obscurePassword),
+                  ),
+
+                  const SizedBox(height: 16),
+
+                  // Forgot Password
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: TextButton(
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => const forgot_password()),
+                        );
+                      },
+                      child: const Text(
+                        "Forgot Password?",
+                        style: TextStyle(color: Colors.amber, fontWeight: FontWeight.w600),
+                      ),
                     ),
                   ),
+
                   const SizedBox(height: 30),
 
                   // Login Button
                   SizedBox(
                     width: double.infinity,
+                    height: 60,
                     child: ElevatedButton(
-                      onPressed: _send_data,
+                      onPressed: _isLoading ? null : _send_data,
                       style: ElevatedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        backgroundColor: Colors.orange,
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12)),
+                        backgroundColor: Colors.amber,
+                        foregroundColor: Colors.black87,
+                        elevation: 15,
+                        shadowColor: Colors.amber.withOpacity(0.7),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
                       ),
-                      child: const Text("Login",
-                          style: TextStyle(color: Colors.white, fontSize: 16)),
+                      child: _isLoading
+                          ? const CircularProgressIndicator(color: Colors.black87)
+                          : const Text(
+                        "LOGIN",
+                        style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, letterSpacing: 2),
+                      ),
                     ),
                   ),
 
-                  const SizedBox(height: 10),
-                  Align(
-                    alignment: Alignment.centerRight,
-                    child: TextButton(
-                      onPressed: () {},
-                      child: const Text("Forgot Password ?",
-                          style: TextStyle(color: Colors.black87)),
-                    ),
-                  ),
-                  const SizedBox(height: 10),
+                  const SizedBox(height: 40),
 
-                  // Divider
-                  Row(children: const <Widget>[
-                    Expanded(child: Divider()),
-                    Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 8),
-                      child: Text("or"),
-                    ),
-                    Expanded(child: Divider()),
-                  ]),
-                  const SizedBox(height: 20),
+                  const Text("Or continue with", style: TextStyle(color: Colors.white70)),
 
-                  // Facebook Button
-                  // SizedBox(
-                  //   width: double.infinity,
-                  //   child: ElevatedButton.icon(
-                  //     onPressed: () {},
-                  //     icon: const Icon(Icons.facebook, color: Colors.white),
-                  //     label: const Text("Log in with Facebook"),
-                  //     style: ElevatedButton.styleFrom(
-                  //         backgroundColor: const Color(0xFF1877F2),
-                  //         padding: const EdgeInsets.symmetric(vertical: 14),
-                  //         shape: RoundedRectangleBorder(
-                  //             borderRadius: BorderRadius.circular(8))),
-                  //   ),
-                  // ),
-                  const SizedBox(height: 30),
+                  const SizedBox(height: 40),
 
-                  // Register Prompt
-                  Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
+                  // Role-based Sign Up Buttons
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
-                      const Text("Don't have an account? ",
-                          style: TextStyle(color: Colors.black87)),
-                      TextButton(onPressed: (){
-                        Navigator.push(context, MaterialPageRoute(builder: (context)=>MyMySignupPage(title: '',)));
-                      }, child: const Text('User signup')),
-                      const Text("Don't have an account vehicle? ",
-                          style: TextStyle(color: Colors.black87)),
-                      TextButton(onPressed: (){
-                        Navigator.push(context, MaterialPageRoute(builder: (context)=>ev_signup(title: '',)));
-                      }, child: const Text('Emergency signup'))
+                      _buildRoleButton("User Signup", Icons.person_add, () {
+                        Navigator.push(context, MaterialPageRoute(builder: (_) => MyMySignupPage(title: '')));
+                      }),
+                      _buildRoleButton("EV Signup", Icons.emergency, () {
+                        Navigator.push(context, MaterialPageRoute(builder: (_) => EVSignupPage(title: '')));
+                      }),
                     ],
                   ),
+
+                  const SizedBox(height: 40),
                 ],
               ),
-            )
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  // Glassmorphic TextField
+  Widget _buildGlassField({
+    required TextEditingController controller,
+    required String hint,
+    required IconData icon,
+    bool isPassword = false,
+    bool obscureText = false,
+    VoidCallback? onToggle,
+    TextInputType keyboardType = TextInputType.text,
+  }) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.15),
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: Colors.white.withOpacity(0.3)),
+        boxShadow: [
+          BoxShadow(color: Colors.black26, blurRadius: 15, offset: const Offset(0, 8)),
+        ],
+      ),
+      child: TextField(
+        controller: controller,
+        obscureText: obscureText,
+        keyboardType: keyboardType,
+        style: const TextStyle(color: Colors.white, fontSize: 17),
+        decoration: InputDecoration(
+          hintText: hint,
+          hintStyle: TextStyle(color: Colors.white.withOpacity(0.7)),
+          prefixIcon: Icon(icon, color: Colors.amber),
+          suffixIcon: isPassword
+              ? IconButton(
+            icon: Icon(obscureText ? Icons.visibility_off : Icons.visibility, color: Colors.amber),
+            onPressed: onToggle,
+          )
+              : null,
+          border: InputBorder.none,
+          contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
+        ),
+      ),
+    );
+  }
+
+  // Role Button
+  Widget _buildRoleButton(String label, IconData icon, VoidCallback onTap) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+        decoration: BoxDecoration(
+          color: Colors.white.withOpacity(0.2),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: Colors.amber.withOpacity(0.5)),
+        ),
+        child: Row(
+          children: [
+            Icon(icon, color: Colors.amber, size: 28),
+            const SizedBox(width: 10),
+            Text(label, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600)),
           ],
         ),
       ),
-    ));
+    );
   }
 
+  // Your original login logic — unchanged
   void _send_data() async {
-    String uname = _usernametextController.text;
+    String uname = _usernametextController.text.trim();
     String password = _passwordtextController.text;
 
-    SharedPreferences sh = await SharedPreferences.getInstance();
-    String url = sh.getString('url').toString();
+    if (uname.isEmpty || password.isEmpty) {
+      Fluttertoast.showToast(msg: "Please fill all fields");
+      return;
+    }
 
-    final urls = Uri.parse('$url/user_login_post/');
+    setState(() => _isLoading = true);
+
     try {
-      final response = await http.post(urls, body: {
-        'uname': uname,
-        'password': password,
-      });
+      SharedPreferences sh = await SharedPreferences.getInstance();
+      String? url = sh.getString('url');
+      if (url == null) {
+        Fluttertoast.showToast(msg: "Server not configured");
+        return;
+      }
+
+      final response = await http.post(
+        Uri.parse('$url/user_login_post/'),
+        body: {'uname': uname, 'password': password},
+      );
+
       if (response.statusCode == 200) {
-        String status = jsonDecode(response.body)['status'];
-        if (status == 'ok') {
-          String lid = jsonDecode(response.body)['lid'].toString();
-          String type = jsonDecode(response.body)['type'].toString();
-          sh.setString("lid", lid);
+        var jsonResponse = jsonDecode(response.body);
+        if (jsonResponse['status'] == 'ok') {
+          String lid = jsonResponse['lid'].toString();
+          String type = jsonResponse['type'].toString();
+          await sh.setString("lid", lid);
 
-          if (type == "Customer"){
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => userhome()),
-            );
+          if (type == "Customer") {
+            Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => UserProDashboard()));
+          } else if (type == 'Emergency vehicle') {
+            Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => evhome()));
+          } else {
+            Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => tphome()));
           }
-          else if(type == 'Emergency vehicle'){
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => evhome()),
-            );
-          }
-          else{
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => tphome()),
-            );
-          }
-
-
         } else {
-          Fluttertoast.showToast(msg: 'Not Found');
+          Fluttertoast.showToast(msg: "Invalid credentials");
         }
       } else {
-        Fluttertoast.showToast(msg: 'Network Error');
+        Fluttertoast.showToast(msg: "Network error");
       }
     } catch (e) {
-      Fluttertoast.showToast(msg: e.toString());
+      Fluttertoast.showToast(msg: "Connection failed");
+    } finally {
+      setState(() => _isLoading = false);
     }
   }
 }

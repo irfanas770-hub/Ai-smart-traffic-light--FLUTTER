@@ -1,187 +1,230 @@
-import 'package:aismarttrafficlight/trafficpolice/addnotification.dart';
-import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
 import 'dart:convert';
-import 'package:fluttertoast/fluttertoast.dart';
-
+import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:http/http.dart' as http;
 
-// import 'editprofile.dart';
 void main() {
   runApp(const myApp());
 }
 
 class myApp extends StatelessWidget {
-  const myApp({super.key});
+  const myApp({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'View Notification',
-      theme: ThemeData(
-
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        useMaterial3: true,
-      ),
-      home: const viewnotification(title: 'View Notification'),
+    return const MaterialApp(
+      debugShowCheckedModeBanner: false,
+      home: tp_viewnotification(title: 'View Notifications'),
     );
   }
 }
 
-class viewnotification extends StatefulWidget {
-  const viewnotification({super.key, required this.title});
-
+class tp_viewnotification extends StatefulWidget {
+  const tp_viewnotification({super.key, required this.title});
   final String title;
 
   @override
-  State<viewnotification> createState() => _viewnotificationState();
+  State<tp_viewnotification> createState() => _tp_viewnotificationState();
 }
 
-class _viewnotificationState extends State<viewnotification> {
+class _tp_viewnotificationState extends State<tp_viewnotification> {
+  List<Map<String, dynamic>> users = [];
+  bool isLoading = true;
 
-  _viewnotificationState()
-  {
-    _send_data();
+  @override
+  void initState() {
+    super.initState();
+    tp_viewnotification("");
   }
+
+  Future<void> tp_viewnotification(String searchValue) async {
+    setState(() => isLoading = true);
+
+    try {
+      SharedPreferences sh = await SharedPreferences.getInstance();
+      String urls = sh.getString('url') ?? '';
+      String lid = sh.getString('lid') ?? '';
+
+      String apiUrl = '$urls/tp_notification_view/';
+
+      var response = await http.post(Uri.parse(apiUrl), body: {'lid': lid});
+      var jsonData = json.decode(response.body);
+
+      if (jsonData['status'] == 'ok') {
+        List<Map<String, dynamic>> tempList = [];
+        for (var item in jsonData['data']) {
+          tempList.add({
+            'date': item['date'] ?? 'No date',
+            'message': item['message'] ?? 'No message',
+          });
+        }
+        setState(() => users = tempList);
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("No notifications available"),
+            backgroundColor: Colors.deepPurple,
+          ),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Failed to load notifications"),
+          backgroundColor: Colors.redAccent,
+        ),
+      );
+    } finally {
+      setState(() => isLoading = false);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-
-
-
     return WillPopScope(
-      onWillPop: () async{ return true; },
+      onWillPop: () async => true,
       child: Scaffold(
         appBar: AppBar(
-          leading: BackButton( ),
-          backgroundColor: Theme.of(context).colorScheme.primary,
-          title: Text(widget.title),
+          backgroundColor: const Color(0xFF1E3A8A), // Deep Navy Blue
+          elevation: 0,
+          centerTitle: true,
+          title: const Text(
+            "Notifications",
+            style: TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+              fontSize: 22,
+              letterSpacing: 1.2,
+            ),
+          ),
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
+            onPressed: () => Navigator.pop(context),
+          ),
         ),
-        body: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-
-
-              // CircleAvatar(radius: 50,),
-              Column(
-                children: [
-              //     Image(image: NetworkImage(photo_),height: 200,width: 200,),
-                  Padding(
-                    padding: EdgeInsets.all(5),
-                    child: Text(date),
+        body: Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [
+                Color(0xFF1E3A),        // Deep Navy
+                Color(0xFF2C5282),        // Slightly lighter navy
+                Colors.white,
+              ],
+              stops: [0.0, 0.3, 0.7],
+            ),
+          ),
+          child: isLoading
+              ? const Center(
+            child: CircularProgressIndicator(
+              color: Colors.amber,
+              strokeWidth: 4,
+            ),
+          )
+              : users.isEmpty
+              ? Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  Icons.notifications_off_rounded,
+                  size: 90,
+                  color: Colors.white.withOpacity(0.6),
+                ),
+                const SizedBox(height: 20),
+                const Text(
+                  "No Notifications Yet",
+                  style: TextStyle(
+                    fontSize: 20,
+                    color: Colors.white,
+                    fontWeight: FontWeight.w600,
                   ),
-                  Padding(
-                    padding: EdgeInsets.all(5),
-                    child: Text(notification),
+                ),
+                const SizedBox(height: 10),
+                Text(
+                  "You'll be notified here when something happens",
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 15,
+                    color: Colors.white.withOpacity(0.8),
                   ),
-                  // Padding(
-                  //   padding: EdgeInsets.all(5),
-                  //   child: Text(gender_),
-                  // ),
-                  // Padding(
-                  //   padding: EdgeInsets.all(5),
-                  //   child: Text(email_),
-                  // ),
-                  // Padding(
-                  //   padding: EdgeInsets.all(5),
-                  //   child: Text(phone_),
-                  // ),
-                  // Padding(
-                  //   padding: EdgeInsets.all(5),
-                  //   child: Text(place_),
-                  // ),
-                  // Padding(
-                  //   padding: EdgeInsets.all(5),
-                  //   child: Text(post_),
-                  // ),
-                  // Padding(
-                  //   padding: EdgeInsets.all(5),
-                  //   child: Text(pin_),
-                  // ),
-                  // Padding(
-                  //   padding: EdgeInsets.all(5),
-                  //   child: Text(district_),
-                  // ),
-
-                ],
-              ),
-              ElevatedButton(
-                onPressed: () {
-                  Navigator.push(context, MaterialPageRoute(
-                    builder: (context) => addnotification(title: " Delete"),));
-                },
-                child: Text("Delete"),
-              ),
-
-            ],
+                ),
+              ],
+            ),
+          )
+              : ListView.builder(
+            padding: const EdgeInsets.fromLTRB(16, 20, 16, 20),
+            itemCount: users.length,
+            itemBuilder: (context, index) {
+              final notification = users[index];
+              return Container(
+                margin: const EdgeInsets.only(bottom: 16),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(20),
+                  color: Colors.white,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.15),
+                      blurRadius: 15,
+                      offset: const Offset(0, 8),
+                    ),
+                  ],
+                ),
+                child: ListTile(
+                  contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 20, vertical: 18),
+                  leading: Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: const BoxDecoration(
+                      color: Color(0xFF1E3A8A),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(
+                      Icons.notifications_active,
+                      color: Colors.amber,
+                      size: 28,
+                    ),
+                  ),
+                  title: Text(
+                    notification['message'],
+                    style: const TextStyle(
+                      fontWeight: FontWeight.w600,
+                      fontSize: 16.5,
+                      color: Color(0xFF1A1A1A),
+                    ),
+                  ),
+                  subtitle: Padding(
+                    padding: const EdgeInsets.only(top: 10),
+                    child: Row(
+                      children: [
+                        Icon(
+                          Icons.access_time,
+                          size: 16,
+                          color: Colors.grey[600],
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          notification['date'],
+                          style: TextStyle(
+                            color: Colors.grey[700],
+                            fontSize: 14,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  trailing: const Icon(
+                    Icons.chevron_right,
+                    color: Color(0xFF1E3A8A),
+                    size: 26,
+                  ),
+                ),
+              );
+            },
           ),
         ),
       ),
     );
-  }
-
-
-  String date="Date";
-  String notification="Notification";
-
-  void _send_data() async{
-
-
-
-    SharedPreferences sh = await SharedPreferences.getInstance();
-    String url = sh.getString('url').toString();
-    String lid = sh.getString('lid').toString();
-
-    final urls = Uri.parse('$url/myapp/user_myApp/');
-    try {
-      final response = await http.post(urls, body: {
-        'lid':lid
-
-
-
-      });
-      if (response.statusCode == 200) {
-        String status = jsonDecode(response.body)['status'];
-        if (status=='ok') {
-          String date=jsonDecode(response.body)['date'];
-          String notification=jsonDecode(response.body)['notification'];
-          // String gender=jsonDecode(response.body)['gender'];
-          // String email=jsonDecode(response.body)['email'];
-          // String phone=jsonDecode(response.body)['phone'];
-          // String place=jsonDecode(response.body)['place'];
-          // String post=jsonDecode(response.body)['post'];
-          // String pin=jsonDecode(response.body)['pin'];
-          // String district=jsonDecode(response.body)['district'];
-          // String photo=url+jsonDecode(response.body)['photo'];
-
-          setState(() {
-
-            date= date;
-            notification= notification;
-            // gender_= gender;
-            // email_= email;
-            // phone_= phone;
-            // place_= place;
-            // post_= post;
-            // pin_= pin;
-            // district_= district;
-            // photo_= photo;
-          });
-
-
-
-
-
-        }else {
-          Fluttertoast.showToast(msg: 'Not Found');
-        }
-      }
-      else {
-        Fluttertoast.showToast(msg: 'Network Error');
-      }
-    }
-    catch (e){
-      Fluttertoast.showToast(msg: e.toString());
-    }
   }
 }
